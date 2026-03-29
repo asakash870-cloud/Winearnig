@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CashReward App</title>
+    
+    <!-- Ad SDK -->
+    <script src='//libtl.com/sdk.js' data-zone='10803739' data-sdk='show_10803739'></script>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #121212; color: #ffffff; }
+        .card-bg { background-color: #1e1e1e; }
+        .text-accent { color: #ff8c00; }
+        .btn-accent { background-color: #ff8c00; color: #121212; font-weight: bold; }
+        .input-field { background-color: #2c2c2c; border: 1px solid #444; }
+        .main-page { display: none; }
+        .main-page.active { display: flex; flex-direction: column; min-height: 100vh; animation: fadeIn 0.4s ease; }
+        .sub-page { display: none; }
+        .sub-page.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body class="max-w-md mx-auto">
+
+    <!-- Loader -->
+    <div id="loader" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-accent"></div>
+    </div>
+
+    <!-- Auth Section -->
+    <div id="auth-section" class="p-6 justify-center main-page active">
+        <h1 class="text-4xl font-bold text-center mb-2 text-accent">CashReward</h1>
+        <p class="text-center text-gray-400 mb-8">Login or Signup to continue</p>
+        
+        <div id="login-view">
+            <input id="login-email" type="email" placeholder="Email" class="w-full p-4 rounded-lg input-field mb-4">
+            <input id="login-password" type="password" placeholder="Password" class="w-full p-4 rounded-lg input-field mb-4">
+            <button id="login-btn" class="w-full p-4 rounded-lg btn-accent">Login</button>
+            <p class="text-center mt-6 text-gray-400">Don't have an account? <a href="#" onclick="toggleAuth(false)" class="text-accent font-bold">Sign Up</a></p>
+        </div>
+
+        <div id="signup-view" class="hidden">
+            <input id="signup-name" type="text" placeholder="Full Name" class="w-full p-4 rounded-lg input-field mb-4">
+            <input id="signup-email" type="email" placeholder="Email" class="w-full p-4 rounded-lg input-field mb-4">
+            <input id="signup-password" type="password" placeholder="Password" class="w-full p-4 rounded-lg input-field mb-4">
+            <button id="signup-btn" class="w-full p-4 rounded-lg btn-accent">Create Account</button>
+            <p class="text-center mt-6 text-gray-400">Already have an account? <a href="#" onclick="toggleAuth(true)" class="text-accent font-bold">Login</a></p>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div id="app-container" class="main-page">
+        <header class="p-4 flex justify-between items-center sticky top-0 bg-black/50 backdrop-blur-md">
+            <h1 class="text-xl font-bold">CashReward</h1>
+            <div class="flex items-center space-x-4">
+                <i data-lucide="bell" onclick="navigateTo('notifications-page')" class="cursor-pointer"></i>
+                <i data-lucide="user" onclick="navigateTo('profile-page')" class="cursor-pointer"></i>
+            </div>
+        </header>
+
+        <main class="flex-grow p-4 pb-24">
+            <!-- Home -->
+            <div id="home-page" class="sub-page active">
+                <div class="card-bg p-6 rounded-2xl mb-6">
+                    <p class="text-gray-400">Total Coins</p>
+                    <h2 class="text-4xl font-bold"><span id="coin-balance">0</span></h2>
+                </div>
+                
+                <h3 class="font-bold mb-4">Daily Rewards</h3>
+                <div class="grid gap-3">
+                    <div class="card-bg p-4 rounded-xl flex justify-between items-center">
+                        <div>
+                            <p class="font-semibold">Watch Ad</p>
+                            <p class="text-xs text-gray-400">Left: <span id="ads-left">0</span></p>
+                        </div>
+                        <button onclick="claimReward('interstitial')" class="btn-accent px-4 py-2 rounded-lg text-sm">Earn 50</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wallet -->
+            <div id="wallet-page" class="sub-page">
+                <h2 class="text-xl font-bold mb-4">Withdraw</h2>
+                <div class="card-bg p-4 rounded-xl">
+                    <p class="text-sm mb-4 text-gray-400" id="withdraw-info">Min: 5000 Coins</p>
+                    <input id="withdraw-amount" type="number" placeholder="Coins" class="w-full p-3 rounded-lg input-field mb-3">
+                    <select id="withdraw-method" class="w-full p-3 rounded-lg input-field mb-3"></select>
+                    <input id="payment-detail" type="text" placeholder="Number / UPI ID" class="w-full p-3 rounded-lg input-field">
+                    <button id="withdraw-btn" class="w-full mt-4 p-3 rounded-lg btn-accent">Request Cashout</button>
+                </div>
+                <div id="history-list" class="mt-6 space-y-2"></div>
+            </div>
+
+            <!-- Refer -->
+            <div id="refer-page" class="sub-page">
+                <div class="card-bg p-8 rounded-2xl text-center">
+                    <p class="text-gray-400 mb-2">Referral Code</p>
+                    <h3 id="referral-code" class="text-2xl font-bold tracking-widest text-accent">...</h3>
+                    <button onclick="copyCode()" class="mt-4 text-sm bg-gray-700 px-4 py-2 rounded-full">Copy & Share</button>
+                </div>
+            </div>
+
+            <!-- Profile -->
+            <div id="profile-page" class="sub-page">
+                <div class="text-center p-6">
+                    <div class="w-20 h-20 bg-accent rounded-full mx-auto mb-4 flex items-center justify-center text-black text-3xl font-bold" id="profile-initial">U</div>
+                    <h2 id="profile-name" class="text-xl font-bold">...</h2>
+                    <p id="profile-email" class="text-gray-400">...</p>
+                    <button id="logout-btn" class="mt-8 text-red-500 font-bold">Logout Account</button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Bottom Nav -->
+        <nav class="fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-md p-4 flex justify-around border-t border-gray-800">
+            <button onclick="navigateTo('home-page')" class="nav-btn text-accent"><i data-lucide="home"></i></button>
+            <button onclick="navigateTo('wallet-page')" class="nav-btn"><i data-lucide="wallet"></i></button>
+            <button onclick="navigateTo('refer-page')" class="nav-btn"><i data-lucide="users"></i></button>
+            <button onclick="navigateTo('profile-page')" class="nav-btn"><i data-lucide="settings"></i></button>
+        </nav>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, serverTimestamp, onSnapshot, query, where, orderBy } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+‎  apiKey: "AIzaSyDgFvU7Hg9jcK2FKbP0aJpVWcNj7vked-c",
+‎  authDomain: "wintt-e0d07.firebaseapp.com",
+‎  databaseURL: "https://wintt-e0d07-default-rtdb.firebaseio.com",
+‎  projectId: "wintt-e0d07",
+‎  storageBucket: "wintt-e0d07.firebasestorage.app",
+‎  messagingSenderId: "952098854749",
+‎  appId: "1:952098854749:web:0eaec57df6ae84fd2dfab4"
+‎};
+‎
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let userData = null;
+        let appConfig = { dailyAdLimit: 10, minWithdrawal: 5000, paymentMethods: ["bKash", "UPI"] };
+
+        // --- Auth Functions ---
+        window.toggleAuth = (isLogin) => {
+            document.getElementById('login-view').classList.toggle('hidden', !isLogin);
+            document.getElementById('signup-view').classList.toggle('hidden', isLogin);
+        };
+
+        const handleSignup = async () => {
+            const name = document.getElementById('signup-name').value;
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+            if(!name || !email || password.length < 6) return alert("Valid name & password (min 6 chars) required.");
+
+            showLoader(true);
+            try {
+                const cred = await createUserWithEmailAndPassword(auth, email, password);
+                const refCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+                await setDoc(doc(db, "users", cred.user.uid), {
+                    uid: cred.user.uid, name, email, balance: 50, referralCode: refCode,
+                    dailyAdCount: 0, lastAdDate: new Date().toDateString(), createdAt: serverTimestamp()
+                });
+            } catch (e) { alert(e.message); }
+            showLoader(false);
+        };
+
+        const handleLogin = async () => {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            showLoader(true);
+            try { await signInWithEmailAndPassword(auth, email, password); } 
+            catch (e) { alert("Login failed!"); }
+            showLoader(false);
+        };
+
+        // --- Core App Logic ---
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                showMainPage('app-container');
+                setupRealtimeListener(user.uid);
+                fetchConfig();
+                lucide.createIcons();
+            } else {
+                showMainPage('auth-section');
+            }
+            showLoader(false);
+        });
+
+        function setupRealtimeListener(uid) {
+            onSnapshot(doc(db, "users", uid), (docSnap) => {
+                if (docSnap.exists()) {
+                    userData = docSnap.data();
+                    updateUI();
+                }
+            });
+        }
+
+        async function fetchConfig() {
+            const snap = await getDoc(doc(db, "config", "main"));
+            if(snap.exists()) {
+                appConfig = {...appConfig, ...snap.data()};
+                updateUI();
+            }
+        }
+
+        function updateUI() {
+            if(!userData) return;
+            document.getElementById('coin-balance').innerText = userData.balance;
+            document.getElementById('profile-name').innerText = userData.name;
+            document.getElementById('profile-email').innerText = userData.email;
+            document.getElementById('referral-code').innerText = userData.referralCode;
+            document.getElementById('profile-initial').innerText = userData.name[0];
+            
+            // Daily Ad Limit Logic
+            const today = new Date().toDateString();
+            const adsDone = userData.lastAdDate === today ? userData.dailyAdCount : 0;
+            document.getElementById('ads-left').innerText = Math.max(0, appConfig.dailyAdLimit - adsDone);
+
+            // Withdrawal Method Setup
+            const select = document.getElementById('withdraw-method');
+            if(select.options.length === 0) {
+                appConfig.paymentMethods.forEach(m => {
+                    let opt = new Option(m, m);
+                    select.add(opt);
+                });
+            }
+        }
+
+        window.claimReward = async (type) => {
+            if(!userData) return;
+            const today = new Date().toDateString();
+            const adsDone = userData.lastAdDate === today ? userData.dailyAdCount : 0;
+
+            if(adsDone >= appConfig.dailyAdLimit) return alert("Daily limit reached!");
+
+            showLoader(true);
+            try {
+                // Simulating Ad show (Wait for script promise)
+                if(window.show_8690632) {
+                    await window.show_8690632();
+                    const userRef = doc(db, "users", userData.uid);
+                    await updateDoc(userRef, {
+                        balance: userData.balance + 50,
+                        dailyAdCount: adsDone + 1,
+                        lastAdDate: today
+                    });
+                    alert("50 Coins added!");
+                } else {
+                    alert("Ad server offline.");
+                }
+            } catch (e) { alert("Error claiming reward."); }
+            showLoader(false);
+        };
+
+        window.navigateTo = (id) => {
+            document.querySelectorAll('.sub-page').forEach(p => p.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            if(id === 'wallet-page') loadHistory();
+        };
+
+        async function loadHistory() {
+            const q = query(collection(db, "withdrawals"), where("userId", "==", userData.uid), orderBy("requestedAt", "desc"));
+            const snap = await getDocs(q);
+            const list = document.getElementById('history-list');
+            list.innerHTML = "";
+            snap.forEach(d => {
+                const data = d.data();
+                list.innerHTML += `<div class="card-bg p-3 rounded-lg flex justify-between text-sm">
+                    <span>${data.amount} Coins (${data.method})</span>
+                    <span class="text-yellow-500">${data.status}</span>
+                </div>`;
+            });
+        }
+
+        // --- Helpers ---
+        function showLoader(show) { document.getElementById('loader').style.display = show ? 'flex' : 'none'; }
+        function showMainPage(id) {
+            document.querySelectorAll('.main-page').forEach(p => p.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+        window.copyCode = () => {
+            navigator.clipboard.writeText(userData.referralCode);
+            alert("Code Copied!");
+        }
+
+        document.getElementById('login-btn').onclick = handleLogin;
+        document.getElementById('signup-btn').onclick = handleSignup;
+        document.getElementById('logout-btn').onclick = () => signOut(auth);
+    </script>
+</body>
+</html>
