@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QT Earnings - Dashboard</title>
+    
+    <!-- Monetag SDK -->
+    <script src='//libtl.com/sdk.js' data-zone='10803739' data-sdk='show_10803739'></script>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.x.x/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.x.x/firebase-database-compat.js"></script>
+
+    <style>
+        :root { --primary: #0088cc; --bg: #f0f2f5; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; display: flex; justify-content: center; }
+        .app-container { width: 100%; max-width: 450px; background: white; min-height: 100vh; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .header { background: var(--primary); color: white; padding: 20px; text-align: center; border-radius: 0 0 20px 20px; }
+        .balance-card { margin: -20px 20px 20px; background: white; padding: 20px; border-radius: 15px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .balance-amount { font-size: 24px; font-weight: bold; color: #2ecc71; }
+        .task-list { padding: 20px; }
+        .btn-task { width: 100%; padding: 15px; margin-bottom: 10px; border: none; border-radius: 10px; background: #eee; font-size: 16px; cursor: pointer; transition: 0.3s; font-weight: 600; }
+        .btn-task:active { transform: scale(0.98); }
+        .btn-claim { background: var(--primary); color: white; }
+        .status { font-size: 12px; margin-top: 10px; color: #888; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="header">
+        <h2>QT Earnings Bot</h2>
+        <p>Task Complete Korun, Taka Incom Korun</p>
+    </div>
+
+    <div class="balance-card">
+        <div>Your Balance</div>
+        <div class="balance-amount">৳ <span id="balance">0.00</span></div>
+        <div id="connection-status" class="status">Connecting to Database...</div>
+    </div>
+
+    <div class="task-list">
+        <h3>Daily Tasks</h3>
+        <button class="btn-task btn-claim" onclick="showAdAndEarn()">🎁 Watch Ad & Earn 0.50 TK</button>
+        <button class="btn-task" onclick="alert('Coming Soon!')">🏆 Lucky Spin</button>
+        <button class="btn-task" onclick="alert('Join Telegram for updates!')">📢 Join Telegram</button>
+    </div>
+</div>
+
+<script>
+    // Firebase Config
+    const firebaseConfig = {
+        apiKey: "AIzaSyDgFvU7Hg9jcK2FKbP0aJpVWcNj7vked-c",
+        authDomain: "wintt-e0d07.firebaseapp.com",
+        databaseURL: "https://wintt-e0d07-default-rtdb.firebaseio.com",
+        projectId: "wintt-e0d07",
+        storageBucket: "wintt-e0d07.firebasestorage.app",
+        messagingSenderId: "952098854749",
+        appId: "1:952098854749:web:0eaec57df6ae84fd2dfab4"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    
+    // User ID (Ekhane dummy ID deya hoyeche, real bot-e eta Telegram ID hobe)
+    const userId = "user_12345"; 
+    let currentBalance = 0;
+
+    // Database theke balance load kora
+    const balanceRef = database.ref('users/' + userId + '/balance');
+    balanceRef.on('value', (snapshot) => {
+        const data = snapshot.val();
+        currentBalance = data || 0;
+        document.getElementById('balance').innerText = currentBalance.toFixed(2);
+        document.getElementById('connection-status').innerText = "Connected: Secure";
+    });
+
+    // Ad dekhano ebong balance add kora
+    function showAdAndEarn() {
+        // Monetag Script automatic click trigger kore
+        // Ekhane amra balance update korchi
+        let reward = 0.50;
+        let newBalance = currentBalance + reward;
+
+        database.ref('users/' + userId).set({
+            balance: newBalance
+        }).then(() => {
+            alert("Congrats! 0.50 TK added to your wallet.");
+        }).catch((error) => {
+            console.error("Error updating balance: ", error);
+        });
+    }
+</script>
+
+</body>
+</html>
